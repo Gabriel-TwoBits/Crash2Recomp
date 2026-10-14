@@ -1,0 +1,27 @@
+Build the runtime on Linux: gpu_gl_postfx.c named its program-link helper
+link(), and on POSIX zlib.h pulls in <unistd.h>, which declares
+int link(const char *, const char *). clang and gcc both stop with "static
+declaration of 'link' follows non-static declaration". The helper is renamed
+link_program(); nothing else refers to it, and the D3D12 compilation that
+includes this file does not rename it, so Windows builds the same code.
+
+--- a/runtime/src/gpu_gl_postfx.c
++++ b/runtime/src/gpu_gl_postfx.c
+@@ -466,7 +466,7 @@
+     return s;
+ }
+ 
+-static GLuint link(const char *vs, const char *fs) {
++static GLuint link_program(const char *vs, const char *fs) {
+     GLuint v = compile(PFX_VERTEX_SHADER, vs), f = compile(PFX_FRAGMENT_SHADER, fs);
+     if (!v || !f) { if (v) f_DeleteShader(v); if (f) f_DeleteShader(f); return 0; }
+     GLuint p = f_CreateProgram();
+@@ -529,7 +529,7 @@
+         { P_COMP,    &VS_WINDOW, &FS_COMPOSITE },
+     };
+     for (size_t i = 0; i < sizeof(progs) / sizeof(progs[0]); i++) {
+-        s_prog[progs[i].id] = link(*progs[i].vs, *progs[i].fs);
++        s_prog[progs[i].id] = link_program(*progs[i].vs, *progs[i].fs);
+         if (!s_prog[progs[i].id]) {
+             fprintf(stdout, "psxrecomp: post-processing disabled: shader %d\n", progs[i].id);
+             glpfx_shutdown();

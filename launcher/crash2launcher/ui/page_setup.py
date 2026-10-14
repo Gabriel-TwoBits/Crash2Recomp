@@ -474,15 +474,24 @@ class SetupPage(QWidget):
         self.steps.set_state("generate", DONE)
         self.steps.set_state("compile", ACTIVE)
 
-        script = self.layout_.project / "build.ps1"
+        # The generator writes both scripts; each configures and builds the same
+        # CMake project.
+        if sys.platform == "win32":
+            script = self.layout_.project / "build.ps1"
+            program = "powershell"
+            args = ["-ExecutionPolicy", "Bypass", "-File", str(script)]
+        else:
+            script = self.layout_.project / "build.sh"
+            program = "sh"
+            args = [str(script)]
         if not script.is_file():
             self.steps.set_state("compile", FAILED, "build script missing")
             self._finish_build(False, "No build script at %s" % script, 1)
             return
 
-        # cmake/ninja/clang must be on PATH for build.ps1, and the PINNED pack
-        # must come first - a pip-installed cmake shim ahead of it is enough to
-        # break the build. Without this the job inherited a bare environment.
+        # cmake/ninja/clang must be on PATH for the build script, and the PINNED
+        # pack must come first - a pip-installed cmake shim ahead of it is enough
+        # to break the build. Without this the job inherited a bare environment.
         env = toolchain_env(self.layout_.root)
         if not env:
             set_status(self.build_note, "Error",
@@ -494,8 +503,8 @@ class SetupPage(QWidget):
             return
 
         self._job = Job(
-            "powershell",
-            ["-ExecutionPolicy", "Bypass", "-File", str(script)],
+            program,
+            args,
             cwd=self.layout_.project,
             env_extra=env,
         )

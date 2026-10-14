@@ -343,7 +343,7 @@ def detect(root: Path | None = None) -> Layout:
             build_dir=project / "build",
             # The recompiler ships in its own folder so its framework/ tree
             # cannot be mistaken for the generated project.
-            cli_exe=root / "recompiler" / "psxrecomp.exe",
+            cli_exe=root / "recompiler" / f"psxrecomp{_EXE_SUFFIX}",
             src_cli=root / "recompiler" / "psxrecomp_cli.py",
         )
 
@@ -360,6 +360,6 @@ def detect(root: Path | None = None) -> Layout:
         disc_data=project / "input",
         userdata=root / "launcher" / "userdata",
         build_dir=project / "build-clang",
-        cli_exe=build / "psxrecomp-cli" / "psxrecomp.exe",
+        cli_exe=build / "psxrecomp-cli" / f"psxrecomp{_EXE_SUFFIX}",
         src_cli=build / "psxrecomp-src" / "psxrecomp_cli.py",
     )

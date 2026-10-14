@@ -246,6 +246,14 @@ python launcher/main.py           # needs Python 3.11+ and PySide6
 _build/build_clang.ps1            # builds the runtime, both trees
 ```
 
+On Linux the build scripts are shell scripts, using the system cmake, ninja and
+clang (set `CC`/`CXX` for a versioned one, e.g. `CC=clang-21 CXX=clang++-21`):
+
+```
+_build/build_recompiler.sh        # the recompiler, its helpers and psxrecomp-game
+_build/build_clang.sh             # builds the runtime, both trees
+```
+
 Runtime changes are made in the gitignored vendored tree at
 `_build/Crash2Recomp/psxrecomp/` and recorded as patches in `tuning/patches/`,
 with the reasoning in `tuning/NOTES.md`. Read `tuning/NOTES.md` before changing

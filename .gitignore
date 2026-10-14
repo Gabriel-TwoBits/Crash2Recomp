@@ -85,6 +85,7 @@ toolchain/
 _build/*
 !_build/*.ps1
 !_build/*.py
+!_build/*.sh
 !_build/padprobe.c
 # Widescreen investigation probes (ws_census, ws_send, wsdiag, ...). Throwaway
 # attach-only diagnostics written against whatever the debug server exposed

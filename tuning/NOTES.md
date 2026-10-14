@@ -4500,3 +4500,36 @@ in C.
 - **Side-on views.** The latest report there ("still wrong") is open. The
   sweep's worst side-on views are its `side_*.png` pictures. A screenshot or a
   level name would say which of them it is.
+
+## Linux build (patch 0060)
+
+The framework, the recompiler and the launcher already had POSIX paths; one
+name stopped the runtime compiling on Linux:
+
+    gpu_gl_postfx.c:469:15: error: static declaration of 'link' follows
+    non-static declaration
+
+Patch 0040 named the shader-program helper `link()`. On POSIX `zlib.h` pulls in
+`<unistd.h>`, which declares `int link(const char *, const char *)`. clang 21
+and gcc 14 both refuse it; the Windows build compiles it, so it only shows on
+POSIX. Renamed `link_program()`.
+
+`_build/build_recompiler.sh` and `_build/build_clang.sh` are the Linux
+counterparts of the .ps1 scripts. psxrecomp publishes no Linux CLI, so the
+recompiler script also builds the helpers the Windows zip supplies and links
+`build-cli/framework` to the vendored tree, which is where `main_cli.cpp`
+looks for both.
+
+Measured on Debian 13 (Mesa, OpenGL 4.6 core), from the v0.9.6 framework
+tree: the generated project builds with clang 21 and gcc 14; the launcher's
+Setup page generates, applies the recompile profile and compiles through
+`build.sh`; the game boots to the title, plays the intro and takes input in
+the first area. `gameplay_smoke.py` passes idle, stock30_baseline,
+lives_hold, cheat_lives_holds_99, no_damage_holds_mode, native60_hold,
+native60_script_rate and native60_sustain against the debugtools build.
+
+Not the same as Windows yet: `autocompile_request()` in `autocompile.c` is
+Windows-only ("non-Windows hosts: manual compile flow only"), so overlays
+the game captures are not compiled while it runs. `compile_overlays.py` runs
+on Linux (it targets `.so` and a `gcc/linux-x64/` cache), but the sessions
+here captured only a data-only region, so no shard was built or loaded.

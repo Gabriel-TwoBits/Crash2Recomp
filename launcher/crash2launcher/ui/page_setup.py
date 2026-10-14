@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import html
 import shutil
+import sys
 import tomllib
 from pathlib import Path
 
@@ -382,7 +383,7 @@ class SetupPage(QWidget):
         # exists - so check first and say what is actually wrong.
         DEEPEST_RELATIVE = 150
         room = 260 - len(str(self.layout_.project))
-        if room < DEEPEST_RELATIVE:
+        if sys.platform == "win32" and room < DEEPEST_RELATIVE:
             set_status(self.build_note, "Error",
                        "The folder path is too long for Windows to build in "
                        "(%d characters, and the build needs about %d more). "
